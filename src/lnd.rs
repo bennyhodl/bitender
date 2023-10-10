@@ -1,10 +1,13 @@
-use std::str::FromStr;
+use std::{str::FromStr, sync::Arc};
 use lightning_invoice::Bolt11Invoice;
 use tonic_lnd::{
     in_mem_connect,
     lnrpc::{InvoiceRequest, InvoiceSubscription, invoice::InvoiceState},
     Client,
 };
+use tokio::sync::mpsc::Sender;
+
+type LndSender = Arc<Sender<String>>;
 
 pub struct LndClient {
     client: Client,
@@ -28,7 +31,7 @@ impl LndClient {
         }
     }
 
-    pub async fn stream_payments(&mut self) -> anyhow::Result<()> {
+    pub async fn stream_payments(&mut self, sender: LndSender) -> anyhow::Result<()> {
         println!("Streamin invoices!");
         let sub = InvoiceSubscription {
             add_index: 0,
@@ -41,7 +44,8 @@ impl LndClient {
             if let Some(state) = InvoiceState::from_i32(invoice.state) {
                 if state == InvoiceState::Settled {
                     println!("Invoice settled! Amt: {}", invoice.amt_paid_msat);
-                }
+                    let _ = sender.send(format!("Invoice paid! {}", invoice.amt_paid_msat)).await;
+                }   
             }
         }
 
