@@ -3,7 +3,7 @@ use dotenv::dotenv;
 pub struct Config {
     pub macaroon: String,
     pub cert: String,
-    pub address: String
+    pub address: String,
 }
 
 impl Config {
@@ -17,7 +17,7 @@ impl Config {
         Ok(Config {
             macaroon,
             cert,
-            address
+            address,
         })
     }
 }
