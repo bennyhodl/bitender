@@ -40,6 +40,8 @@
     function showQRCode(data) {
       pourBeer.style.display = "none";
       barTab.style.display = "block";
+      // For testing
+      // pr.innerHTML = data;
       generateQRCode(data);
     }
 
@@ -94,6 +96,7 @@
       <div id="barTab" class="payReq" style="display: none;">
         <h1 style="text-align: center;">Pay Bar Tab</h1>
         <a id="payReq"></a>
+        <p id="pr"></p>
       </div>
     </div>
   </body>
