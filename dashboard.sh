@@ -4,9 +4,9 @@
 
 DIR="$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd)"
 
-CHROME_ZOOM="1.0"
+CHROME_ZOOM="2.0"
 
-KIOSK_ARGS="--kiosk --disable-translate --incognito --app=${DIR}/index.html --force-device-scale-factor=${CHROME_ZOOM}"
+KIOSK_ARGS="--kiosk --disable-translate --incognito --force-device-scale-factor=${CHROME_ZOOM} ${DIR}/index.html"
 
 # Don't sleep, don't blank, waste energy!
 
@@ -19,7 +19,6 @@ if [ "$os_name" = "Darwin" ]; then
 elif [ "$os_name" = "Linux" ]; then
     DISPLAY=:0 xset s off
     DISPLAY=:0 xset s noblank
-    DISPLAY=:0 xset -dpms
 
     DISPLAY=:0 nohup chromium-browser $KIOSK_ARGS &> /dev/null &
     echo "Running on Raspberry Pi (Raspberry Pi OS)"

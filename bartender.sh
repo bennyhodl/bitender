@@ -25,6 +25,7 @@ EOF
 app_start(){
   echo 🎵 hey, bartender 🎵
 
+  rm -f ${DIR}/log.txt
 	BARTENDER=${DIR}/target/debug/bartender
 	# Check if the websocket bridge has been built
 	if [ ! -f ${BARTENDER} ]; then
@@ -33,9 +34,8 @@ app_start(){
 	# Start up the dashboard
 	source ${DIR}/dashboard.sh
 	# Hide mouse when still
-	#DISPLAY=:0 unclutter -idle 0.01 -root &
+	# DISPLAY=:0 unclutter -idle 0.01 -root &
 	# Start websocket server, fork to background and pipe output to file
-  # RUST_LOG=info ${BARTENDER} & > ${DIR}/info.log
   export RUST_LOG=info
   nohup ${BARTENDER} > log.txt 2>&1 &
 }
@@ -44,8 +44,8 @@ app_start(){
 app_stop(){
 	echo "Killing all services..."
 	killall bartender
-	# pkill -o chromium
-	# killall unclutter
+	pkill -o chromium
+	killall unclutter
 }
 
 # Build or rebuild the java lighning node web bridge
