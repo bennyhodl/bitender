@@ -53,34 +53,7 @@ async fn bartender_is_on_the_clock(
         Err(_) => panic!("No env!"),
     };
 
-    let valve_receiver = receiver.clone();
     let pr_receiver = receiver.clone();
-
-    tokio::spawn(async move {
-        while let Some(_) = valve_receiver.lock().await.recv().await {
-            // Send raspi scrip here?
-            let pour_beer = Command::new("python3")
-                .arg("gpio_handler.py")
-                .arg("-p")
-                .arg("cocktail")
-                .output();
-
-            match pour_beer {
-                Ok(output) => {
-                    if output.status.success() {
-                        // The command was successful.
-                        let stdout = String::from_utf8_lossy(&output.stdout);
-                        info!("{}", stdout);
-                    } else {
-                        eprintln!("Command failed with error code: {:?}", output.status);
-                    }
-                }
-                Err(err) => {
-                    eprintln!("Error executing command: {:?}", err);
-                }
-            }
-        }
-    });
 
     tokio::spawn(async move {
         let mut client = LndClient::new(config.address, config.macaroon, config.cert).await;
@@ -100,6 +73,12 @@ async fn bartender_is_on_the_clock(
                 if let Err(e) = bartender_tx.send(Message::text(msg)).await {
                     error!("Error: {}", e);
                 };
+                
+                let _pour_beer = Command::new("python3")
+                    .arg("gpio_handler.py")
+                    .arg("-p")
+                    .arg("cocktail")
+                    .status();
 
                 let next_pr = match client
                     .create_invoice("Bitcoin Bay Bartender".to_string(), 50)

@@ -69,7 +69,6 @@ def __setup_GPIO(channel=r_ch1):
     GPIO.setwarnings(False)
     GPIO.setmode(GPIO.BCM)
 
-    print("setting up gpio_{}".format(channel))
     GPIO.setup(channel, GPIO.OUT)
     __set_gpio(channel, S_OFF)
 
@@ -78,7 +77,6 @@ def __set_gpio(channel=r_ch1, value=S_OFF):
         Try to safely change the value of a gpio, catch exception if it fails
         TODO: Exception Handling
     """
-    print("setting grpio_{}".format(channel))
     try:
         GPIO.output(channel, value)
     except:
@@ -94,18 +92,14 @@ def gpio_test():
         __setup_GPIO(gpio)
 
         __set_gpio(gpio, S_ON)
-        print("Channel_{}: gpio_{} on".format(i, gpio))
         time.sleep(0.1)
         __set_gpio(gpio, S_OFF)
-        print("Channel_{}: gpio_{} off".format(i, gpio))
         time.sleep(0.1)
-        time.sleep(5)
 
 def draw_beer(channel=r_ch1, wait=t_beer):
     """
         Draw a delicious beer, keep the tap on for n_wait seconds
     """
-    print("pouring drink")
     # Setup gpio pin
     __setup_GPIO(channel)
 
@@ -119,8 +113,6 @@ if __name__ == "__main__":
     """
     # parse arguments
     args = cli_args_parser()
-
-    print(args.products)
 
     # call functions according to the given arguments
     if args.test:
@@ -136,4 +128,4 @@ if __name__ == "__main__":
         print("Choice: Cocktail")
         draw_beer(r_ch1, t_cocktail)
     else:
-        print("sumting wong")rint("TODO")
+        print("sumting wong")
