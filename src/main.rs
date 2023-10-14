@@ -3,6 +3,7 @@ pub mod lnd;
 
 use futures_util::{SinkExt, StreamExt};
 use lnd::LndClient;
+use log::{error, info};
 use std::process::Command;
 use std::{sync::Arc, time::Duration};
 use tokio::sync::{
@@ -10,7 +11,6 @@ use tokio::sync::{
     Mutex,
 };
 use warp::{filters::ws::Message, Filter};
-use log::{info, error};
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -42,7 +42,10 @@ async fn main() -> anyhow::Result<()> {
     Ok(())
 }
 
-async fn bartender_is_on_the_clock(ws: warp::ws::WebSocket, receiver: Arc<Mutex<Receiver<String>>>) {
+async fn bartender_is_on_the_clock(
+    ws: warp::ws::WebSocket,
+    receiver: Arc<Mutex<Receiver<String>>>,
+) {
     let (mut bartender_tx, mut bartender_rx) = ws.split();
 
     let config = match config::Config::parse() {
@@ -56,7 +59,7 @@ async fn bartender_is_on_the_clock(ws: warp::ws::WebSocket, receiver: Arc<Mutex<
         let mut client = LndClient::new(config.address, config.macaroon, config.cert).await;
 
         let pay_req = match client
-            .create_invoice("Bitcoin Bay Bartender".to_string(), 50_000)
+            .create_invoice("Bitcoin Bay Bartender".to_string(), 50)
             .await
         {
             Ok(pr) => pr,
@@ -72,7 +75,7 @@ async fn bartender_is_on_the_clock(ws: warp::ws::WebSocket, receiver: Arc<Mutex<
                 };
 
                 let next_pr = match client
-                    .create_invoice("Bitcoin Bay Bartender".to_string(), 50_000)
+                    .create_invoice("Bitcoin Bay Bartender".to_string(), 50)
                     .await
                 {
                     Ok(pr) => pr,
@@ -83,10 +86,25 @@ async fn bartender_is_on_the_clock(ws: warp::ws::WebSocket, receiver: Arc<Mutex<
                 };
 
                 // Send raspi scrip here?
-                let _pour_beer = Command::new("python3")
+                let pour_beer = Command::new("python3")
                     .arg("gpio_handler.py")
-                    .output()
-                    .expect("Couldn't run script.");
+                    .arg("-p cocktail")
+                    .output();
+
+                match pour_beer {
+                    Ok(output) => {
+                        if output.status.success() {
+                            // The command was successful.
+                            let stdout = String::from_utf8_lossy(&output.stdout);
+                            print!("Command output:\n{}", stdout);
+                        } else {
+                            eprintln!("Command failed with error code: {:?}", output.status);
+                        }
+                    }
+                    Err(err) => {
+                        eprintln!("Error executing command: {:?}", err);
+                    }
+                }
 
                 let _pour_beer = tokio::time::sleep(Duration::from_secs(5)).await;
 

@@ -1,4 +1,5 @@
 use lightning_invoice::Bolt11Invoice;
+use log::info;
 use std::{str::FromStr, sync::Arc};
 use tokio::sync::mpsc::Sender;
 use tonic_lnd::{
@@ -6,7 +7,6 @@ use tonic_lnd::{
     lnrpc::{invoice::InvoiceState, InvoiceRequest, InvoiceSubscription},
     Client,
 };
-use log::info;
 
 type LndSender = Arc<Sender<String>>;
 
@@ -16,13 +16,15 @@ pub struct LndClient {
 
 impl LndClient {
     pub async fn new(address: String, macaroon_hex: String, cert_hex: String) -> LndClient {
+        info!("Calling the bartender.");
         let client = in_mem_connect(address, cert_hex, macaroon_hex).await;
         match client {
             Ok(client) => {
                 info!("The bar is now open.");
                 LndClient { client }
             }
-            Err(_e) => {
+            Err(e) => {
+                info!("Error LND! {}", e);
                 panic!();
             }
         }
