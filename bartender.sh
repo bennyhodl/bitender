@@ -37,7 +37,8 @@ app_start(){
 	# DISPLAY=:0 unclutter -idle 0.01 -root &
 	# Start websocket server, fork to background and pipe output to file
   export RUST_LOG=info
-  nohup ${BARTENDER} > log.txt 2>&1 &
+  # nohup ${BARTENDER} > log.txt 2>&1 &
+  cargo run
 }
 
 # Stop all services

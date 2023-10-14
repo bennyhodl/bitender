@@ -53,42 +53,16 @@ async fn bartender_is_on_the_clock(
         Err(_) => panic!("No env!"),
     };
 
+    let valve_receiver = receiver.clone();
+    let pr_receiver = receiver.clone();
+
     tokio::spawn(async move {
-        let receiver_clone = receiver.clone();
 
-        let mut client = LndClient::new(config.address, config.macaroon, config.cert).await;
-
-        let pay_req = match client
-            .create_invoice("Bitcoin Bay Bartender".to_string(), 50)
-            .await
-        {
-            Ok(pr) => pr,
-            Err(_e) => "no-payment-request".to_string(),
-        };
-
-        while let Some(_message) = bartender_rx.next().await {
-            let _ = bartender_tx.send(Message::text(pay_req.clone())).await;
-
-            while let Some(msg) = receiver_clone.lock().await.recv().await {
-                if let Err(e) = bartender_tx.send(Message::text(msg)).await {
-                    error!("Error: {}", e);
-                };
-
-                let next_pr = match client
-                    .create_invoice("Bitcoin Bay Bartender".to_string(), 50)
-                    .await
-                {
-                    Ok(pr) => pr,
-                    Err(e) => {
-                        error!("Error creating new payment request: {}", e);
-                        continue;
-                    }
-                };
-
+        while let Some(_) = valve_receiver.lock().await.recv().await { 
                 // Send raspi scrip here?
                 let pour_beer = Command::new("python3")
                     .arg("gpio_handler.py")
-                    .arg("-p cocktail")
+                    .arg("-t")
                     .output();
 
                 match pour_beer {
@@ -105,6 +79,38 @@ async fn bartender_is_on_the_clock(
                         eprintln!("Error executing command: {:?}", err);
                     }
                 }
+        };
+    });
+
+    tokio::spawn(async move {
+        let mut client = LndClient::new(config.address, config.macaroon, config.cert).await;
+
+        let pay_req = match client
+            .create_invoice("Bitcoin Bay Bartender".to_string(), 50)
+            .await
+        {
+            Ok(pr) => pr,
+            Err(_e) => "no-payment-request".to_string(),
+        };
+
+        while let Some(_message) = bartender_rx.next().await {
+            let _ = bartender_tx.send(Message::text(pay_req.clone())).await;
+
+            while let Some(msg) = pr_receiver.lock().await.recv().await {
+                if let Err(e) = bartender_tx.send(Message::text(msg)).await {
+                    error!("Error: {}", e);
+                };
+
+                let next_pr = match client
+                    .create_invoice("Bitcoin Bay Bartender".to_string(), 50)
+                    .await
+                {
+                    Ok(pr) => pr,
+                    Err(e) => {
+                        error!("Error creating new payment request: {}", e);
+                        continue;
+                    }
+                };
 
                 let _pour_beer = tokio::time::sleep(Duration::from_secs(5)).await;
 
