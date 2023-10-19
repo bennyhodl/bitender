@@ -34,7 +34,7 @@ app_start(){
 	# Start up the dashboard
 	source ${DIR}/dashboard.sh
 	# Hide mouse when still
-	# DISPLAY=:0 unclutter -idle 0.01 -root &
+	DISPLAY=:0 unclutter -idle 0.01 -root &
 	# Start websocket server, fork to background and pipe output to file
   export RUST_LOG=info
   nohup ${BARTENDER} --serve > log.txt 2>&1 &
