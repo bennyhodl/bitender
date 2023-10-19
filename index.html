@@ -8,29 +8,34 @@
   </head>
 
   <script>
-    const ws = new WebSocket("ws://localhost:3030/bartender"); // Replace with your WebSocket server URL
-
-    ws.addEventListener("open", () => {
-      ws.send("heyhowareya");
-    });
-
-    ws.addEventListener("message", (event) => {
-      
-      const message = event.data;
-          
-      if (message === "hey-bartender-pour-me-a-beer") {
-        console.log("Pour beer!")
-        pouringBeer();
-      } else if (message.startsWith("ln")) {
-        console.log("New bar tab!", message);
-        showQRCode(message);
-      }
-    });
-
-    ws.addEventListener("close", () => {
-      console.log("Connection closed");
-    });
+    console.log("warming up")
     
+    setTimeout(() => {
+      const ws = new WebSocket("ws://localhost:3030/bartender");
+
+      ws.addEventListener("open", () => {
+        ws.send("heyhowareya");
+      });
+
+      ws.addEventListener("message", (event) => {
+        
+        const message = event.data;
+            
+        if (message === "hey-bartender-pour-me-a-beer") {
+          console.log("Pour beer!", message)
+          pouringBeer();
+        } else if (message.startsWith("ln")) {
+          console.log("New bar tab!", message);
+          showQRCode(message);
+        }
+      });
+
+      ws.addEventListener("close", () => {
+        console.log("Connection closed");
+      });
+
+    }, 5000);
+ 
     function pouringBeer() {
       console.log("Pouring beer.");
       pourBeer.style.display = "block";
@@ -40,21 +45,30 @@
     function showQRCode(data) {
       pourBeer.style.display = "none";
       barTab.style.display = "block";
-      // For testing
-      // pr.innerHTML = data;
       generateQRCode(data);
     }
 
     function generateQRCode(data) {
       let code = document.getElementById("payReq");
       code.innerHTML = "";
-      let qr = new QRCode(document.getElementById("payReq"), data);
+      let qr = new QRCode(document.getElementById("payReq"), {
+          text: data,
+          width: 500,
+          height: 500,
+      });
     }
 
   </script>
   <style>
+    body {
+      background-color: #0B1439;
+      color: #FFF;
+      font-size: 3rem;
+    }
+
     .container {
       display: flex;
+      flex-direction: column;
       width: 100%;
       justify-content: space-around;
       align-items: center;
@@ -88,17 +102,16 @@
     <div class="container">
       <div class="bartender">
         <h1>Bitcoin Bay Bartender</h1>
-        <img src="./logo.png" width="250" height="250" />
+        <img src="./logo.png" width="500" height="500" style="transform: translateX(-50px);" />
       </div>
       <div id="pourBeer" class="pourBeer" style="display: none;">
         <h1 style="text-align: center;">Beer tab paid!</h1>
-        <img src="./success.png" width="250" height="250" />
+        <img src="./success.png" width="500" height="500" />
       </div>
 
       <div id="barTab" class="payReq" style="display: none;">
         <h1 style="text-align: center;">Pay Bar Tab</h1>
         <a id="payReq"></a>
-        <p id="pr"></p>
       </div>
     </div>
   </body>

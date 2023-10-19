@@ -45,7 +45,9 @@ impl LndClient {
 
         while let Some(invoice) = subscription.message().await? {
             if let Some(state) = InvoiceState::from_i32(invoice.state) {
-                if state == InvoiceState::Settled && invoice.memo == "Bitcoin Bay Bartender".to_string() {
+                if state == InvoiceState::Settled
+                    && invoice.memo == "Bitcoin Bay Bartender".to_string()
+                {
                     info!("Bar tab paid. Pouring a beer...");
                     let _ = sender
                         .send("hey-bartender-pour-me-a-beer".to_string())

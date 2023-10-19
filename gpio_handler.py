@@ -20,10 +20,10 @@ r_ch3 = 21
 
 # time constants in seconds
 # single tap
-t_beer = 6
-t_cocktail = 6
+t_beer = 1.5
+t_cocktail = 1.5
 
-t_flush = 20
+t_flush = 10
 
 # Syntax suger because of negative logic
 S_ON = GPIO.LOW
@@ -57,7 +57,7 @@ def cli_args_parser():
             '-f',
             '--flush',
             action='store_true',
-            help="Flush tap for 20s!"
+            help="Flush tap for 10s!"
     )
 
     return parser.parse_args()
