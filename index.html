@@ -97,14 +97,26 @@
       justify-content: center;
     }
 
+    .cashapp {
+      display: flex; 
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+      width: 800px;
+    }
+
   </style>
   <body>
     <div class="container">
       <div class="bartender">
-        <h1>Bitcoin Bay Bartender</h1>
+        <h1 class="margin-bottom: 15px;">Bitcoin Bay Bartender</h1>
+        <div class="cashapp">
+          <h3 style="margin: 0;">Use CashApp Bitcoin to pay!</h3>
+          <img src="./cash-app.png" width="75" height="75" />
+        </div>
         <div class="logos">
           <img src="./logo.png" width="500" height="500" style="transform: translateX(-50px);" />
-          <img src="./bitcoin-bay-website.png" width="450" height="450" /> 
+          <img src="./bitcoin-bay-website.png" width="450" height="450" class="padding-left: 15px;"/> 
         </div>
       </div>
       <div id="pourBeer" class="pourBeer" style="display: none;">
